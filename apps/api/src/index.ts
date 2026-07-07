@@ -8,6 +8,6 @@ import { logger } from "@/lib/logger"
 
 const config = loadConfig(env)
 
-serve({ fetch: app.fetch, port: config.API_PORT }, (info) => {
+serve({ fetch: app.fetch, port: config.api.port }, (info) => {
   logger.info(`listening on http://127.0.0.1:${info.port}`)
 })

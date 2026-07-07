@@ -11,11 +11,11 @@ const config = loadConfig(env)
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   server: {
-    host: config.WEB_HOST,
-    port: config.WEB_PORT,
+    host: config.web.host,
+    port: config.web.port,
     strictPort: true,
     proxy: {
-      "/api": `http://${config.API_HOST}:${config.API_PORT}`,
+      "/api": `http://${config.api.host}:${config.api.port}`,
     },
   },
 })

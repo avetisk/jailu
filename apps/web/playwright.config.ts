@@ -5,7 +5,7 @@ import { defineConfig } from "@playwright/test"
 import { loadConfig } from "./src/config"
 
 const config = loadConfig(env)
-const baseURL = `http://${config.WEB_HOST}:${config.WEB_PORT}`
+const baseURL = `http://${config.web.host}:${config.web.port}`
 
 export default defineConfig({
   testDir: "./e2e",
