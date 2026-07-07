@@ -1,13 +1,20 @@
+import { env } from "node:process"
+
 import { defineConfig } from "@playwright/test"
+
+import { loadConfig } from "./src/config"
+
+const config = loadConfig(env)
+const baseURL = `http://${config.WEB_HOST}:${config.WEB_PORT}`
 
 export default defineConfig({
   testDir: "./e2e",
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL,
   },
   webServer: {
     command: "pnpm dev",
-    url: "http://127.0.0.1:5173",
+    url: baseURL,
     reuseExistingServer: true,
   },
 })
