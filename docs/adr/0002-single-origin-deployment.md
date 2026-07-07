@@ -1,11 +1,15 @@
-# ADR-0002 — Single-origin deployment
+# ADR-0002 — Single-origin deployment behind Caddy
 
 Status: accepted
 
-Decision: In production the Hono server serves the built SPA, the `/api/*` routes, and the
-`/:code` redirect from one origin and one container; dev uses Vite with an `/api` proxy.
+Decision: In production Caddy is the edge on one origin — it terminates TLS, serves the built
+SPA as static files, sets security headers, and reverse-proxies `/api/*` and `/:code` to the
+Hono API. Hono is API + redirect only; it never serves static assets. Dev runs the dockerized
+Vite dev server (`pnpm dev`) with an `/api` proxy.
 
-Why: same-origin removes CORS and makes passkey/WebAuthn RP-ID and session cookies trivial;
-one container fits railgun's single loopback-port shape.
+Why: single origin removes CORS and makes passkey/WebAuthn RP-ID and session cookies trivial;
+Caddy is better than Hono at static, TLS and headers, and matches the production host's single
+loopback-port convention.
 
-Rejected: separate web/api origins (CORS, cookie/RP-ID friction, two deploys).
+Rejected: Hono serving static (worse at it, mixes concerns); separate web/api origins (CORS,
+cookie/RP-ID friction).
