@@ -1,9 +1,7 @@
-import type { HealthResponse } from "@jailu/shared"
 import { Hono } from "hono"
 
-export const app = new Hono()
+// The API is the single source of truth for the contract.
+// Routes are chained so `AppType` carries end-to-end types to the client via Hono RPC.
+export const app = new Hono().get("/api/health", (c) => c.json({ status: "ok" }))
 
-app.get("/api/health", (c) => {
-  const body: HealthResponse = { status: "ok" }
-  return c.json(body)
-})
+export type AppType = typeof app

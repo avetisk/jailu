@@ -15,19 +15,19 @@ malicious-URL scanning (Safe Browsing), email flows.
 
 ## Architecture
 
-pnpm monorepo. React SPA talks to a Hono API over a `zod` contract shared by
-both sides. Postgres is the source of truth; Redis caches hot lookups and backs
-rate limiting.
+pnpm monorepo. A React SPA calls a Hono API. The API server is the single source
+of truth: it validates request bodies with zod and exposes end-to-end types to the
+client via Hono RPC (`hc<AppType>`). Postgres is the source of truth for data; Redis
+caches hot lookups and backs rate limiting.
 
 ```
-apps/web       React SPA — vite, react-router, tailwind, shadcn/ui, react-hook-form, zod
-apps/api       Hono (Node) — kysely + pg, better-auth, redis, zod
-packages/shared  zod schemas + inferred types (the API contract)
+apps/web   React SPA — vite, react-router, tailwind, shadcn/ui, react-hook-form, zod
+apps/api   Hono (Node) — kysely + pg, better-auth, redis, zod; owns the contract (RPC)
 ```
 
-- **Shorten:** `POST /api/links` -> validate -> mint random code -> insert -> return short URL.
+- **Shorten:** `POST /api/links` -> zod-validate + normalize -> mint random code -> insert -> return short URL.
 - **Redirect:** `GET /:code` -> Redis lookup (fallback Postgres) -> if expired `410`, else `302` to target -> record click async.
-- **Contract:** request/response shapes live once in `packages/shared`; `web` uses them as react-hook-form resolvers, `api` as request guards.
+- **Contract:** the API owns it. Server validates with `@hono/zod-validator`; the client gets typed calls + response types via Hono RPC. Client forms keep their own schemas and map to the API payload — form data is not the API input (see ADR-0003).
 
 ## Data model
 
@@ -58,7 +58,7 @@ holds across the stack; only hand-written psql needs quoted identifiers.
 - Random 7-char base62 codes — non-enumerable; unique constraint + retry on collision.
 - Redis cache on the redirect hot path; invalidated on edit/disable/delete.
 - Redis rate limiting on mint + auth + redirect.
-- Shared `zod` contract in `packages/shared` — one source of truth across the wire.
+- API contract via Hono RPC — the server owns request/response types; no shared contract package; forms own their schemas (ADR-0003).
 - `kysely` (typed SQL) over an ORM — explicit queries, full types, no magic.
 - Passkeys (WebAuthn) via better-auth — phishing-resistant, session-only.
 - Link expiry is authoritative in Postgres (`expiresAt`); Redis TTL only mirrors it. Expired links return `410`.
