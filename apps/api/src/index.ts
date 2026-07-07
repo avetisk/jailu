@@ -2,11 +2,12 @@ import { env } from "node:process"
 
 import { serve } from "@hono/node-server"
 
-import { app } from "./app"
-import { logger } from "./lib/logger"
+import { app } from "@/app"
+import { loadConfig } from "@/config"
+import { logger } from "@/lib/logger"
 
-const port = Number(env.PORT ?? 3000)
+const config = loadConfig(env)
 
-serve({ fetch: app.fetch, port }, (info) => {
-  logger.info(`jailu-api listening on http://127.0.0.1:${info.port}`)
+serve({ fetch: app.fetch, port: config.API_PORT }, (info) => {
+  logger.info(`listening on http://127.0.0.1:${info.port}`)
 })

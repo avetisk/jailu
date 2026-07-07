@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { logger } from "../src/lib/logger"
+import { logger } from "@/lib/logger"
 
 describe("logger", () => {
   it("exposes a configured tslog instance", () => {
