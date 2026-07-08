@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
 import { findLinkByCode, insertLink } from "@jailu/api/src/links/repository"
-import { linkCodeSchema, shortenableUrlSchema } from "@jailu/shared"
+import { HTTP_STATUS, linkCodeSchema, shortenableUrlSchema } from "@jailu/shared"
 import { Hono } from "hono"
 import { z } from "zod"
 
@@ -15,7 +15,10 @@ export const app = new Hono()
     const { url } = c.req.valid("json")
     const link = await insertLink(url)
     const shortUrl = new URL(`/${link.linkCode}`, c.req.url).href
-    return c.json({ linkCode: link.linkCode, url: shortUrl, originalUrl: link.originalUrl }, 201)
+    return c.json(
+      { linkCode: link.linkCode, url: shortUrl, originalUrl: link.originalUrl },
+      HTTP_STATUS.CREATED,
+    )
   })
   .get("/:linkCode", async (c) => {
     const parsed = linkCodeSchema.safeParse(c.req.param("linkCode"))
@@ -26,7 +29,7 @@ export const app = new Hono()
     if (!link) {
       return c.notFound()
     }
-    return c.redirect(link.originalUrl, 302)
+    return c.redirect(link.originalUrl, HTTP_STATUS.FOUND)
   })
 
 export type AppType = typeof app

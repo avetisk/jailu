@@ -2,6 +2,7 @@ import { app } from "@jailu/api/src/app"
 import { db } from "@jailu/api/src/db"
 import { createMigrator } from "@jailu/api/src/db/migrator"
 import { findLinkByCode, insertLink } from "@jailu/api/src/links/repository"
+import { HTTP_STATUS } from "@jailu/shared"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import { z } from "zod"
 
@@ -55,22 +56,22 @@ describe("links repository (real Postgres)", () => {
 describe("links API (real Postgres)", () => {
   it("POST /api/links shortens a valid URL and GET /:linkCode redirects to it", async () => {
     const res = await postLink("https://example.com")
-    expect(res.status).toBe(201)
+    expect(res.status).toBe(HTTP_STATUS.CREATED)
     const body = shortenResponse.parse(await res.json())
     expect(body.linkCode).toMatch(/^[A-Za-z0-9_-]{7}$/u)
     expect(body.originalUrl).toBe("https://example.com/")
 
     const redirect = await app.request(`/${body.linkCode}`)
-    expect(redirect.status).toBe(302)
+    expect(redirect.status).toBe(HTTP_STATUS.FOUND)
     expect(redirect.headers.get("location")).toBe("https://example.com/")
   })
 
   it("POST /api/links rejects an invalid destination with 400", async () => {
-    expect((await postLink("http://localhost")).status).toBe(400)
+    expect((await postLink("http://localhost")).status).toBe(HTTP_STATUS.BAD_REQUEST)
   })
 
   it("GET /:linkCode is 404 for an unknown code and a malformed one", async () => {
-    expect((await app.request("/nolink1")).status).toBe(404)
-    expect((await app.request("/has.dot")).status).toBe(404)
+    expect((await app.request("/nolink1")).status).toBe(HTTP_STATUS.NOT_FOUND)
+    expect((await app.request("/has.dot")).status).toBe(HTTP_STATUS.NOT_FOUND)
   })
 })

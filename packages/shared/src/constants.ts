@@ -4,6 +4,17 @@
 // client uses it for validation and display. (Public — re-exported from the barrel.)
 export const LINK_CODE_LENGTH = 7
 
+// Named HTTP status codes used by the API and (from Slice 2) the client — the reason
+// phrases keep call sites self-documenting (HTTP_STATUS.CREATED beats a bare 201). `as
+// const` preserves the literal types Hono's c.json / c.redirect expect. (Public.)
+export const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  FOUND: 302,
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+} as const
+
 // URL-validation constants — internal to the url utilities + shortenableUrlSchema (not re-exported).
 export const MAX_URL_LENGTH = 2048
 export const ALLOWED_PROTOCOLS = new Set(["http:", "https:"])
