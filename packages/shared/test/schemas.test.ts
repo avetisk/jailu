@@ -1,3 +1,4 @@
+import { URL_ERROR } from "@jailu/shared/src/errors"
 import {
   hostSchema,
   linkCodeSchema,
@@ -48,35 +49,40 @@ describe("shortenableUrlSchema", () => {
     expect(shortenableUrlSchema.parse("https://münchen.de")).toBe("https://xn--mnchen-3ya.de/")
   })
 
-  it("rejects every conventional bad destination", () => {
-    // Each entry is a distinct abuse/mistake class: empty, unparseable, over the length
-    // cap, dangerous schemes (javascript/data/file), non-http(s), embedded credentials,
-    // self-host loops, localhost, IPv4/IPv6/integer IP literals, and hosts with no real
-    // public TLD (single label, one-char TLD, non-public TLD).
-    const bad = [
-      "",
-      "not a url",
-      `https://example.com/${"x".repeat(2048)}`,
-      ["javascript", "alert(1)"].join(":"),
-      "data:text/html,x",
-      "file:///etc/passwd",
-      "ftp://example.com",
-      "http://user:pass@example.com",
-      "http://:pass@example.com",
-      "https://jai.lu/abc",
-      "https://www.jai.lu/abc",
-      "http://localhost",
-      "http://api.localhost",
-      "http://127.0.0.1",
-      "http://[::1]",
-      "http://2130706433",
-      "http://example",
-      "http://foo.b",
-      "http://foo.internal",
-      "http://service.local",
+  it("rejects every conventional bad destination with its stable error code", () => {
+    // Each entry pairs a distinct abuse/mistake class with the code the schema must emit
+    // (as the zod issue `message` — the client localizes it, the API returns it verbatim).
+    const cases: [string, string][] = [
+      ["", URL_ERROR.EMPTY],
+      ["   ", URL_ERROR.EMPTY],
+      [`https://example.com/${"x".repeat(2048)}`, URL_ERROR.TOO_LONG],
+      ["not a url", URL_ERROR.MALFORMED],
+      [["javascript", "alert(1)"].join(":"), URL_ERROR.SCHEME_NOT_ALLOWED],
+      ["data:text/html,x", URL_ERROR.SCHEME_NOT_ALLOWED],
+      ["file:///etc/passwd", URL_ERROR.SCHEME_NOT_ALLOWED],
+      ["ftp://example.com", URL_ERROR.SCHEME_NOT_ALLOWED],
+      ["http://user:pass@example.com", URL_ERROR.CREDENTIALS_PRESENT],
+      ["http://:pass@example.com", URL_ERROR.CREDENTIALS_PRESENT],
+      ["https://jai.lu/abc", URL_ERROR.SELF_HOST],
+      ["https://www.jai.lu/abc", URL_ERROR.SELF_HOST],
+      ["http://localhost", URL_ERROR.LOCALHOST],
+      ["http://api.localhost", URL_ERROR.LOCALHOST],
+      ["http://127.0.0.1", URL_ERROR.IP_HOST],
+      ["http://[::1]", URL_ERROR.IP_HOST],
+      ["http://2130706433", URL_ERROR.IP_HOST],
+      ["http://example", URL_ERROR.NO_PUBLIC_TLD],
+      ["http://foo.b", URL_ERROR.NO_PUBLIC_TLD],
+      ["http://foo.internal", URL_ERROR.NO_PUBLIC_TLD],
+      ["http://service.local", URL_ERROR.NO_PUBLIC_TLD],
     ]
-    for (const value of bad) {
-      expect(shortenableUrlSchema.safeParse(value).success, value).toBe(false)
+    for (const [value, code] of cases) {
+      const result = shortenableUrlSchema.safeParse(value)
+      expect(result.success, value).toBe(false)
+      // Exactly one issue per failure, carrying the stable code.
+      expect(
+        result.error?.issues.map((issue) => issue.message),
+        value,
+      ).toEqual([code])
     }
   })
 })
