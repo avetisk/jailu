@@ -1,9 +1,11 @@
 import { z } from "zod"
 
+export * from "./constants"
+
 // Flat, single-value schemas shared across the codebase — config env vars, client
 // form fields, and API request bodies. Each is one atomic, semantically-identical
-// value (a host, a port, a URL, a code, …). Object and request/response contracts do
-// NOT live here — those come from the API via Hono RPC (ADR-0001, ADR-0003).
+// value (a host, a port, a URL, a link code, …). Object and request/response contracts
+// do NOT live here — those come from the API via Hono RPC (ADR-0001, ADR-0003).
 //
 // These stay browser-safe (no Node APIs): the client forms import them directly.
 
@@ -11,9 +13,9 @@ export const hostSchema = z.string().min(1)
 
 export const portSchema = z.coerce.number().int().positive().max(65535)
 
-// A short code is base64url (the URL-safe 64-char alphabet), 3–64 chars. Minted codes
-// are 7 chars; the range leaves room for custom aliases later without a schema change.
-export const codeSchema = z.string().regex(/^[A-Za-z0-9_-]{3,64}$/u)
+// A short link code is base64url (the URL-safe 64-char alphabet), 3–64 chars. Minted
+// codes are LINK_CODE_LENGTH; the range leaves room for custom aliases without a change.
+export const linkCodeSchema = z.string().regex(/^[A-Za-z0-9_-]{3,64}$/u)
 
 const MAX_URL_LENGTH = 2048
 const ALLOWED_PROTOCOLS = new Set(["http:", "https:"])

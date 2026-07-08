@@ -1,17 +1,17 @@
-import { codeSchema } from "@jailu/shared"
+import { LINK_CODE_LENGTH, linkCodeSchema } from "@jailu/shared"
 import { describe, expect, it } from "vitest"
 
-import { CODE_LENGTH, generateCode } from "@/lib/code"
+import { generateLinkCode } from "@/lib/generate-link-code"
 
-describe("generateCode", () => {
+describe("generateLinkCode", () => {
   it("mints a base64url code of the expected length", () => {
-    const code = generateCode()
-    expect(code).toHaveLength(CODE_LENGTH)
-    expect(codeSchema.safeParse(code).success).toBe(true)
+    const code = generateLinkCode()
+    expect(code).toHaveLength(LINK_CODE_LENGTH)
+    expect(linkCodeSchema.safeParse(code).success).toBe(true)
   })
 
   it("is effectively unique across many draws (non-enumerable)", () => {
-    const codes = Array.from({ length: 500 }, () => generateCode())
+    const codes = Array.from({ length: 500 }, () => generateLinkCode())
     for (const code of codes) {
       expect(code).toMatch(/^[A-Za-z0-9_-]{7}$/u)
     }

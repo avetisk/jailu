@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { codeSchema, hostSchema, portSchema, urlSchema } from "../src/index"
+import { linkCodeSchema, hostSchema, portSchema, urlSchema } from "../src/index"
 
 describe("hostSchema", () => {
   it("accepts a non-empty host and rejects empty", () => {
@@ -21,16 +21,16 @@ describe("portSchema", () => {
   })
 })
 
-describe("codeSchema", () => {
+describe("linkCodeSchema", () => {
   it("accepts base64url codes in range", () => {
     for (const good of ["abc", "A1_-bc9", "z".repeat(64)]) {
-      expect(codeSchema.safeParse(good).success).toBe(true)
+      expect(linkCodeSchema.safeParse(good).success).toBe(true)
     }
   })
 
   it("rejects too-short, too-long, and non-base64url codes", () => {
     for (const bad of ["ab", "z".repeat(65), "has space", "with/slash", "dot.dot"]) {
-      expect(codeSchema.safeParse(bad).success).toBe(false)
+      expect(linkCodeSchema.safeParse(bad).success).toBe(false)
     }
   })
 })

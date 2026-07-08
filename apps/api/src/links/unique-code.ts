@@ -1,15 +1,14 @@
-import { generateCode } from "@/lib/code"
+import { PG_ERROR_CODES } from "@/db/error-codes"
+import { generateLinkCode } from "@/lib/generate-link-code"
 
 const MAX_ATTEMPTS = 5
-// Postgres unique_violation SQLSTATE — a code collided with the unique index.
-const UNIQUE_VIOLATION = "23505"
 
 function isUniqueViolation(error: unknown): boolean {
   return (
     typeof error === "object" &&
     error !== null &&
     "code" in error &&
-    error.code === UNIQUE_VIOLATION
+    error.code === PG_ERROR_CODES.UNIQUE_VIOLATION
   )
 }
 
@@ -19,7 +18,7 @@ function isUniqueViolation(error: unknown): boolean {
 // testable without forcing a real DB collision.
 export async function withUniqueCode<T>(
   attempt: (code: string) => Promise<T>,
-  generate: () => string = generateCode,
+  generate: () => string = generateLinkCode,
 ): Promise<T> {
   let lastError: unknown = null
   for (let i = 0; i < MAX_ATTEMPTS; i += 1) {
