@@ -13,7 +13,7 @@ inline in `docker-compose.yml`.
 
 Why: one command brings the whole stack up identically on any machine — no locally-installed
 Postgres/Redis to drift or set up. Injecting env through compose keeps host and container config
-the same *shape* (one schema) differing only in *values* (DB host is the `postgres` service, the
+the same _shape_ (one schema) differing only in _values_ (DB host is the `postgres` service, the
 server binds `0.0.0.0`). Dropping the in-process loader leaves a single way to read config — the
 environment — the same in container, test, and CI, and lets config fail loud instead of masking a
 missing var with a fallback. Keeping topology + gotchas next to the services they configure keeps
