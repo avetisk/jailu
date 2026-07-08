@@ -14,6 +14,8 @@ it is shortened. It is trimmed, length-capped, parsed with the WHATWG `URL`, nor
 - hosts with no real public TLD — single-label, one-char TLD, and RFC 2606/6761
   special-use TLDs (`.local`, `.internal`, `.test`, …)
 
+Each rejection surfaces as a stable error code, not prose — the caller localizes it (ADR-0007).
+
 Why: the audience is security-first, so the shortener refuses the conventional abuse and
 mistake classes up front. The target URL is **never fetched server-side**, so this is pure
 validation + normalization — there is no SSRF surface to begin with, and the host rejects

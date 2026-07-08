@@ -1,4 +1,5 @@
 import { MAX_URL_LENGTH } from "@jailu/shared/src/constants"
+import { URL_ERROR } from "@jailu/shared/src/errors"
 import { urlIssue } from "@jailu/shared/src/utils"
 import { z } from "zod"
 
@@ -23,10 +24,18 @@ export const linkCodeSchema = z.string().regex(/^[A-Za-z0-9_-]{3,64}$/u)
 export const shortenableUrlSchema = z
   .string()
   .trim()
-  .min(1)
-  .max(MAX_URL_LENGTH)
   .superRefine((value, ctx) => {
-    const issue = urlIssue(value)
+    // Every rejection carries a stable code in `message` (see errors.ts). Length and
+    // emptiness are checked here too — not via .min/.max — so a single code is emitted per
+    // failure (and the transform below is reached only when the value is fully valid).
+    let issue = null
+    if (value.length === 0) {
+      issue = URL_ERROR.EMPTY
+    } else if (value.length > MAX_URL_LENGTH) {
+      issue = URL_ERROR.TOO_LONG
+    } else {
+      issue = urlIssue(value)
+    }
     if (issue !== null) {
       ctx.addIssue({ code: "custom", message: issue })
     }
