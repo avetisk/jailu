@@ -4,7 +4,7 @@
 // client uses it for validation and display. (Public — re-exported from the barrel.)
 export const LINK_CODE_LENGTH = 7
 
-// URL-validation constants — internal to the url utilities + urlSchema (not re-exported).
+// URL-validation constants — internal to the url utilities + shortenableUrlSchema (not re-exported).
 export const MAX_URL_LENGTH = 2048
 export const ALLOWED_PROTOCOLS = new Set(["http:", "https:"])
 // Refuse to shorten our own links — a jai.lu -> jai.lu hop is a pointless loop.

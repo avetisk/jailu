@@ -1,11 +1,11 @@
 import { zValidator } from "@hono/zod-validator"
-import { linkCodeSchema, urlSchema } from "@jailu/shared"
+import { linkCodeSchema, shortenableUrlSchema } from "@jailu/shared"
 import { Hono } from "hono"
 import { z } from "zod"
 
 import { findLinkByCode, insertLink } from "@/links/repository"
 
-const shortenRequest = z.object({ url: urlSchema })
+const shortenRequest = z.object({ url: shortenableUrlSchema })
 
 // The API is the single source of truth for the contract. Routes are chained so
 // `AppType` carries end-to-end types to the client via Hono RPC. The redirect lives at

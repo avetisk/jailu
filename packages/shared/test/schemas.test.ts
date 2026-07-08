@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { linkCodeSchema, hostSchema, portSchema, urlSchema } from "../src/index"
+import { hostSchema, linkCodeSchema, portSchema, shortenableUrlSchema } from "../src/schemas"
 
 describe("hostSchema", () => {
   it("accepts a non-empty host and rejects empty", () => {
@@ -35,13 +35,13 @@ describe("linkCodeSchema", () => {
   })
 })
 
-describe("urlSchema", () => {
+describe("shortenableUrlSchema", () => {
   it("accepts and normalizes a public http(s) URL", () => {
-    expect(urlSchema.parse("https://Example.COM")).toBe("https://example.com/")
-    expect(urlSchema.parse("  http://sub.example.co.uk/a?b=1  ")).toBe(
+    expect(shortenableUrlSchema.parse("https://Example.COM")).toBe("https://example.com/")
+    expect(shortenableUrlSchema.parse("  http://sub.example.co.uk/a?b=1  ")).toBe(
       "http://sub.example.co.uk/a?b=1",
     )
-    expect(urlSchema.parse("https://münchen.de")).toBe("https://xn--mnchen-3ya.de/")
+    expect(shortenableUrlSchema.parse("https://münchen.de")).toBe("https://xn--mnchen-3ya.de/")
   })
 
   it("rejects every conventional bad destination", () => {
@@ -72,7 +72,7 @@ describe("urlSchema", () => {
       "http://service.local",
     ]
     for (const value of bad) {
-      expect(urlSchema.safeParse(value).success, value).toBe(false)
+      expect(shortenableUrlSchema.safeParse(value).success, value).toBe(false)
     }
   })
 })

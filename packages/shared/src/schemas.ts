@@ -17,11 +17,11 @@ export const portSchema = z.coerce.number().int().positive().max(65535)
 // are LINK_CODE_LENGTH; the range leaves room for custom aliases without a schema change.
 export const linkCodeSchema = z.string().regex(/^[A-Za-z0-9_-]{3,64}$/u)
 
-// A public, shortenable destination. Hardened against the conventional abuse/mistake
-// classes (see urlIssue): non-http(s) schemes, embedded credentials, self-host loops,
-// localhost, bare IP addresses, and hosts with no public TLD. The URL is never fetched
-// server-side (no SSRF), so this is validation + normalization only.
-export const urlSchema = z
+// A URL we accept as shortenable — not any URL. Hardened against the conventional
+// abuse/mistake classes (see urlIssue): non-http(s) schemes, embedded credentials,
+// self-host loops, localhost, bare IP addresses, and hosts with no public TLD. Never
+// fetched server-side (no SSRF), so this is validation + normalization only.
+export const shortenableUrlSchema = z
   .string()
   .trim()
   .min(1)

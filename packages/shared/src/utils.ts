@@ -1,6 +1,6 @@
 import { ALLOWED_PROTOCOLS, IPV4, NON_PUBLIC_TLDS, PUBLIC_DOMAIN, SELF_HOSTS } from "./constants"
 
-// URL-validation helpers behind urlSchema, kept out of the schema file (SoC). Browser-safe
+// URL-validation helpers behind shortenableUrlSchema, kept out of the schema file (SoC). Browser-safe
 // (WHATWG URL only, no Node APIs). Grouped by domain here as they grow.
 
 function parseUrl(value: string): URL | null {
