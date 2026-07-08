@@ -1,3 +1,6 @@
+# Local dev stack: `docker compose up` runs the whole thing — Postgres, Redis, the API,
+# and the web dev server — with env injected here (no in-process .env loader) and pending
+# migrations applied on start. No Caddy in dev; the production edge is the deploy slice.
 services:
   postgres:
     image: postgres:17-alpine
@@ -24,6 +27,55 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    # Container-networked env (not the host values in .env/.env.example): the DB host is
+    # the `postgres` service, and the server binds 0.0.0.0 so the web container and the
+    # host can both reach it.
+    environment:
+      API_HOST: "0.0.0.0"
+      API_PORT: "3000"
+      DATABASE_URL: "postgres://jailu:jailu@postgres:5432/jailu"
+    # Apply pending migrations (Postgres is healthy by depends_on), then watch-run the API.
+    command: sh -c "pnpm --filter @jailu/api migrate && pnpm --filter @jailu/api dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # 127.0.0.1, not localhost: the Node server binds IPv4 (0.0.0.0), and `localhost`
+    # resolves to IPv6 (::1) first in the container, which would refuse the connection.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    # Vite binds 0.0.0.0 and proxies /api to the `api` service (API_HOST/API_PORT).
+    environment:
+      WEB_HOST: "0.0.0.0"
+      WEB_PORT: "5173"
+      API_HOST: "api"
+      API_PORT: "3000"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   pgdata:

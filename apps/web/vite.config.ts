@@ -8,14 +8,20 @@ import { loadConfig } from "./src/config"
 
 const config = loadConfig(env)
 
+// The dev server and the built-app preview serve identically — same host/port and the same
+// /api proxy — so e2e hits one baseURL whether it runs against the production build (CI) or
+// the dev server (local). The only difference: dev transforms on the fly; preview serves dist/.
+const serve = {
+  host: config.web.host,
+  port: config.web.port,
+  strictPort: true,
+  proxy: {
+    "/api": `http://${config.api.host}:${config.api.port}`,
+  },
+}
+
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
-  server: {
-    host: config.web.host,
-    port: config.web.port,
-    strictPort: true,
-    proxy: {
-      "/api": `http://${config.api.host}:${config.api.port}`,
-    },
-  },
+  server: serve,
+  preview: serve,
 })
