@@ -8,7 +8,9 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
-      exclude: ["src/index.ts"],
+      // Entrypoint + env bootstrap: I/O wiring (serve, .env file load), not logic —
+      // exercised by running the app, not unit-tested. Everything else stays at 100%.
+      exclude: ["src/index.ts", "src/env.ts"],
       thresholds: {
         lines: 100,
         functions: 100,

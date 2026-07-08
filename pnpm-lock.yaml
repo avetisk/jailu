@@ -29,6 +29,9 @@ importers:
       '@hono/node-server':
         specifier: ^2.0.8
         version: 2.0.8(hono@4.12.27)
+      '@jailu/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       hono:
         specifier: ^4.12.27
         version: 4.12.27
@@ -83,7 +86,11 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
 
-  packages/shared: {}
+  packages/shared:
+    dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
 
 packages:
 
