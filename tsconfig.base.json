@@ -17,6 +17,11 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@jailu/shared/src/*": ["./packages/shared/src/*"],
+      "@jailu/api/src/*": ["./apps/api/src/*"],
+      "@jailu/web/src/*": ["./apps/web/src/*"]
+    }
   }
 }

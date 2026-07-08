@@ -1,7 +1,6 @@
+import { generateLinkCode } from "@jailu/api/src/lib/generate-link-code"
 import { LINK_CODE_LENGTH, linkCodeSchema } from "@jailu/shared"
 import { describe, expect, it } from "vitest"
-
-import { generateLinkCode } from "@/lib/generate-link-code"
 
 describe("generateLinkCode", () => {
   it("mints a base64url code of the expected length", () => {

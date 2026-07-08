@@ -1,8 +1,8 @@
 import { exit } from "node:process"
 
-import { db } from "@/db"
-import { createMigrator } from "@/db/migrator"
-import { logger } from "@/lib/logger"
+import { db } from "@jailu/api/src/db"
+import { createMigrator } from "@jailu/api/src/db/migrator"
+import { logger } from "@jailu/api/src/lib/logger"
 
 const { error, results } = await createMigrator().migrateToLatest()
 

@@ -14,12 +14,18 @@ anything deployable, and link rather than copy their content here.
 
 ## Imports / path aliases
 
-Within an **application** package (`apps/*`), use the `@/` tsconfig path alias for
-intra-package imports — never deep relative chains (`../../..`). Each app is its own
-`tsc`/`tsx`/`vite` entry point, so `@/*` (→ `./src/*`) resolves everywhere in it.
+Use **package-namespaced** path aliases for intra-package imports — `@jailu/<pkg>/src/*`,
+defined once in the root `tsconfig.base.json` and inherited by every package (packages do
+not redefine `paths`). Never deep relative chains (`../../..`).
 
-The `packages/shared` library is consumed **as source** by the apps, so its own internal
-imports stay **relative** (`./x`): `@/` inside shared resolves against the _consumer's_
-tsconfig, not shared's, which breaks `tsc` typecheck and `tsx` runtime in the apps
-(verified). Shared's imports are all same-directory, so relative stays flat and clean.
-Cross-package imports always use the package name (`@jailu/shared`).
+Why namespaced and not a bare `@/`: the packages are consumed **as source** — the apps read
+`@jailu/shared`'s files for value schemas, and (from Slice 2) web reads `@jailu/api`'s files
+for the RPC `AppType`. A bare `@/` resolves against the _consumer's_ tsconfig, so a
+dependency's internal `@/` imports break the consumer's `tsc` and `tsx` (verified).
+`@jailu/<pkg>/src/*` is globally unambiguous, so it resolves identically from any package —
+validated across `tsc`, `tsx`, `vitest`, and `vite`.
+
+- intra-package: `import { db } from "@jailu/api/src/db"`
+- cross-package public API: the bare package name — `import { shortenableUrlSchema } from "@jailu/shared"`
+- exception: `vite.config.ts` / `playwright.config.ts` bootstrap the alias resolver, so they
+  use relative `./src/config` (the alias isn't active yet while the config file itself loads).

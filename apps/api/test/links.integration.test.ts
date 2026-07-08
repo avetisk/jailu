@@ -1,10 +1,9 @@
+import { app } from "@jailu/api/src/app"
+import { db } from "@jailu/api/src/db"
+import { createMigrator } from "@jailu/api/src/db/migrator"
+import { findLinkByCode, insertLink } from "@jailu/api/src/links/repository"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import { z } from "zod"
-
-import { app } from "@/app"
-import { db } from "@/db"
-import { createMigrator } from "@/db/migrator"
-import { findLinkByCode, insertLink } from "@/links/repository"
 
 const shortenResponse = z.object({
   linkCode: z.string(),

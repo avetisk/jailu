@@ -1,7 +1,6 @@
+import { MAX_URL_LENGTH } from "@jailu/shared/src/constants"
+import { urlIssue } from "@jailu/shared/src/utils"
 import { z } from "zod"
-
-import { MAX_URL_LENGTH } from "./constants"
-import { urlIssue } from "./utils"
 
 // Flat, single-value schemas shared across the codebase — config env vars, client form
 // fields, and API request bodies. Each is one atomic, semantically-identical value (a host,

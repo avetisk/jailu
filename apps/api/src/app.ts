@@ -1,9 +1,8 @@
 import { zValidator } from "@hono/zod-validator"
+import { findLinkByCode, insertLink } from "@jailu/api/src/links/repository"
 import { linkCodeSchema, shortenableUrlSchema } from "@jailu/shared"
 import { Hono } from "hono"
 import { z } from "zod"
-
-import { findLinkByCode, insertLink } from "@/links/repository"
 
 const shortenRequest = z.object({ url: shortenableUrlSchema })
 

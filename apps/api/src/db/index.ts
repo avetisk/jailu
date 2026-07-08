@@ -1,11 +1,10 @@
-import "@/env"
+import "@jailu/api/src/env"
 import { env } from "node:process"
 
+import { loadConfig } from "@jailu/api/src/config"
+import type { Database } from "@jailu/api/src/db/schema"
 import { Kysely, PostgresDialect } from "kysely"
 import pg from "pg"
-
-import { loadConfig } from "@/config"
-import type { Database } from "@/db/schema"
 
 const config = loadConfig(env)
 

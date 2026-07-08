@@ -1,11 +1,10 @@
-import "@/env"
+import "@jailu/api/src/env"
 import { env } from "node:process"
 
 import { serve } from "@hono/node-server"
-
-import { app } from "@/app"
-import { loadConfig } from "@/config"
-import { logger } from "@/lib/logger"
+import { app } from "@jailu/api/src/app"
+import { loadConfig } from "@jailu/api/src/config"
+import { logger } from "@jailu/api/src/lib/logger"
 
 const config = loadConfig(env)
 

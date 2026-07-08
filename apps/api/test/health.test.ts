@@ -1,6 +1,5 @@
+import { app } from "@jailu/api/src/app"
 import { describe, expect, it } from "vitest"
-
-import { app } from "@/app"
 
 describe("GET /api/health", () => {
   it("returns a 200 with status ok", async () => {

@@ -1,6 +1,5 @@
+import { loadConfig } from "@jailu/api/src/config"
 import { describe, expect, it } from "vitest"
-
-import { loadConfig } from "@/config"
 
 const validEnv = {
   API_HOST: "127.0.0.1",

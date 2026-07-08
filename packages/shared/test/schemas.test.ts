@@ -1,6 +1,10 @@
+import {
+  hostSchema,
+  linkCodeSchema,
+  portSchema,
+  shortenableUrlSchema,
+} from "@jailu/shared/src/schemas"
 import { describe, expect, it } from "vitest"
-
-import { hostSchema, linkCodeSchema, portSchema, shortenableUrlSchema } from "../src/schemas"
 
 describe("hostSchema", () => {
   it("accepts a non-empty host and rejects empty", () => {

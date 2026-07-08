@@ -1,9 +1,8 @@
+import { withUniqueCode } from "@jailu/api/src/links/unique-code"
 // These tests intentionally reject with non-Error values to exercise the
 // isUniqueViolation type guard, so prefer-promise-reject-errors is disabled here.
 /* eslint-disable prefer-promise-reject-errors */
 import { describe, expect, it } from "vitest"
-
-import { withUniqueCode } from "@/links/unique-code"
 
 const uniqueViolation = { code: "23505" }
 

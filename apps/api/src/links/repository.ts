@@ -1,8 +1,7 @@
+import { db } from "@jailu/api/src/db"
+import type { LinksTable } from "@jailu/api/src/db/schema"
+import { withUniqueCode } from "@jailu/api/src/links/unique-code"
 import type { Selectable } from "kysely"
-
-import { db } from "@/db"
-import type { LinksTable } from "@/db/schema"
-import { withUniqueCode } from "@/links/unique-code"
 
 export type ShortLink = Selectable<LinksTable>
 
