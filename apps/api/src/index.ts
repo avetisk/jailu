@@ -1,4 +1,3 @@
-import "@jailu/api/src/env"
 import { env } from "node:process"
 
 import { serve } from "@hono/node-server"

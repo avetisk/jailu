@@ -5,7 +5,6 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     environment: "node",
-    setupFiles: ["./test/setup.ts"],
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
@@ -13,7 +12,6 @@ export default defineConfig({
       // applying migrations, not unit-tested. Everything with logic stays at 100%.
       exclude: [
         "src/index.ts",
-        "src/env.ts",
         "src/db/index.ts",
         "src/db/schema.ts",
         "src/db/migrator.ts",

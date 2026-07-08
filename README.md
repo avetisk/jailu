@@ -12,27 +12,28 @@ contract and exposes end-to-end types via Hono RPC. Postgres is the source of tr
 
 ## Getting started (local dev)
 
-Prerequisites: Node 24+, pnpm, Docker.
+Prerequisites: Docker. (pnpm + Node 24 only if you want to run the gate on the host.)
 
 ```sh
-pnpm install
-cp .env.example .env                 # suggested local values; edit as needed
-docker compose up -d                 # Postgres + Redis
-pnpm --filter @jailu/api migrate     # create the schema
-pnpm dev                             # api + web dev servers
+docker compose up          # Postgres + Redis + API + web — migrations applied, env injected
 ```
 
-Configuration is **fail-loud**: every variable in `.env.example` is required and
-validated on boot — nothing is silently defaulted, so a missing value is an error, not a
-surprise. Copy the file and the app starts; forget to, and it tells you exactly what's
-missing.
+That's the whole stack: the API on http://localhost:3000 and the SPA on
+http://localhost:5173 (its `/api` calls are proxied to the API). Compose injects each
+service's environment and applies pending migrations on start, so there's no `.env` to
+copy for the containers; edit a file under `src/` and the dev servers hot-reload.
 
-Try it once the API is up:
+Configuration is **fail-loud**: every variable the API needs is validated on boot (see
+[`apps/api/src/config.ts`](apps/api/src/config.ts)) — nothing is silently defaulted, so a
+missing value is an error, not a surprise. In a container that env comes from compose; on
+the host (tests, CI) it comes from the environment — there is no in-process `.env` loader.
+
+Try it once the stack is up:
 
 ```sh
 curl -X POST localhost:3000/api/links -H 'content-type: application/json' \
   -d '{"url":"https://example.com/some/long/path"}'
-# -> { "code": "...", "url": ".../<code>", "originalUrl": "..." }
+# -> { "linkCode": "...", "url": ".../<linkCode>", "originalUrl": "..." }
 ```
 
 ## Quality gates
@@ -41,6 +42,10 @@ Every slice ships behind an all-green gate: `pnpm lint` (oxlint, deny-warnings),
 `pnpm fmt:check` (oxfmt), `pnpm typecheck`, `pnpm coverage` (vitest, 100% of first-party
 logic incl. real-Postgres integration), and `pnpm test:e2e` (Playwright). CI runs them on
 every PR.
+
+To run the gate on the host, provide the API's env first — either export a copied
+`.env` (`cp .env.example .env`, then `set -a; . ./.env; set +a`) or run it inside the
+stack: `docker compose run --rm api pnpm coverage`.
 
 ## Layout
 

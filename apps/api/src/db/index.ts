@@ -1,4 +1,3 @@
-import "@jailu/api/src/env"
 import { env } from "node:process"
 
 import { loadConfig } from "@jailu/api/src/config"
