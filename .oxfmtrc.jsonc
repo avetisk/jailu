@@ -32,5 +32,5 @@
   "sortImports": true,
   "sortTailwindcss": true,
 
-  "ignorePatterns": [],
+  "ignorePatterns": ["**/routeTree.gen.ts"],
 }
