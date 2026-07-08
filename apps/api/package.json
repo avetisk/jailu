@@ -5,18 +5,24 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "migrate": "tsx src/db/migrate.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@hono/node-server": "^2.0.8",
+    "@hono/zod-validator": "^0.8.0",
+    "@jailu/shared": "workspace:*",
     "hono": "^4.12.27",
+    "kysely": "^0.29.3",
+    "pg": "^8.22.0",
     "tslog": "^4.10.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",
+    "@types/pg": "^8.20.0",
     "@vitest/coverage-v8": "^4.1.9",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.9"

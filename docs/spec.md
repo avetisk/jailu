@@ -71,7 +71,7 @@ holds across the stack; only hand-written psql needs quoted identifiers.
 
 ## Security posture
 
-- Scheme allowlist (`http`/`https`); reject `javascript:`/`data:`/`file:`; reject self-host (`jai.lu`); length cap; normalize.
+- URL hardening in the shared `urlSchema` (ADR-0005): `http`/`https` allowlist (reject `javascript:`/`data:`/`file:`); reject embedded credentials, self-host (`jai.lu`), `localhost`, bare IP addresses, and hosts with no public TLD; length cap; normalize. The target is never fetched server-side — no SSRF surface.
 - Non-enumerable codes; parameterized queries (kysely); httpOnly session cookies.
 - Rate limiting on mint, auth, and redirect endpoints.
 - Target URLs are never fetched server-side — no SSRF surface.

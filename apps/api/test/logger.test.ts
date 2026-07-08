@@ -1,6 +1,5 @@
+import { logger } from "@jailu/api/src/lib/logger"
 import { describe, expect, it } from "vitest"
-
-import { logger } from "@/lib/logger"
 
 describe("logger", () => {
   it("exposes a configured tslog instance", () => {
