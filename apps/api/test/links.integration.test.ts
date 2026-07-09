@@ -1,4 +1,5 @@
 import { createApp } from "@jailu/api/src/app"
+import { redis } from "@jailu/api/src/cache"
 import { db } from "@jailu/api/src/db"
 import { createMigrator } from "@jailu/api/src/db/migrator"
 import { findLinkByCode, insertLink } from "@jailu/api/src/links/repository"
@@ -34,10 +35,12 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await db.deleteFrom("links").execute()
+  await redis.flushdb()
 })
 
 afterAll(async () => {
   await db.destroy()
+  await redis.quit()
 })
 
 describe("links repository (real Postgres)", () => {
@@ -66,9 +69,18 @@ describe("links API (real Postgres)", () => {
     // The short URL is built from the configured public base, not the request URL.
     expect(body.url).toBe(`${baseUrl}/${body.linkCode}`)
 
-    const redirect = await app.request(`/${body.linkCode}`)
-    expect(redirect.status).toBe(HTTP_STATUS.FOUND)
-    expect(redirect.headers.get("location")).toBe("https://example.com/")
+    // First redirect is a cache miss: it resolves from Postgres and populates the cache.
+    const miss = await app.request(`/${body.linkCode}`)
+    expect(miss.status).toBe(HTTP_STATUS.FOUND)
+    expect(miss.headers.get("location")).toBe("https://example.com/")
+    expect(await redis.get(`link:${body.linkCode}`)).toBe("https://example.com/")
+
+    // Second redirect is served from the cache — the Postgres row is deleted first to prove the
+    // hit path never reads the database.
+    await db.deleteFrom("links").execute()
+    const hit = await app.request(`/${body.linkCode}`)
+    expect(hit.status).toBe(HTTP_STATUS.FOUND)
+    expect(hit.headers.get("location")).toBe("https://example.com/")
   })
 
   it("POST /api/links rejects an invalid destination with 400", async () => {
