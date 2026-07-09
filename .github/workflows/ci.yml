@@ -29,6 +29,7 @@ jobs:
       API_HOST: 127.0.0.1
       API_PORT: "3000"
       DATABASE_URL: postgres://jailu:jailu@127.0.0.1:5432/jailu
+      PUBLIC_BASE_URL: http://127.0.0.1:5173
       WEB_HOST: 127.0.0.1
       WEB_PORT: "5173"
 

@@ -39,6 +39,9 @@ services:
       API_HOST: "0.0.0.0"
       API_PORT: "3000"
       DATABASE_URL: "postgres://jailu:jailu@postgres:5432/jailu"
+      # The origin the browser reaches the app at (the web dev server), so minted short links
+      # point there — not at this container's internal `api:3000` host.
+      PUBLIC_BASE_URL: "http://localhost:5173"
     # Apply pending migrations (Postgres is healthy by depends_on), then watch-run the API.
     command: sh -c "pnpm --filter @jailu/api migrate && pnpm --filter @jailu/api dev"
     ports:

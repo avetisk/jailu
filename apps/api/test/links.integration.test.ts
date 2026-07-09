@@ -1,10 +1,13 @@
-import { app } from "@jailu/api/src/app"
+import { createApp } from "@jailu/api/src/app"
 import { db } from "@jailu/api/src/db"
 import { createMigrator } from "@jailu/api/src/db/migrator"
 import { findLinkByCode, insertLink } from "@jailu/api/src/links/repository"
 import { HTTP_STATUS } from "@jailu/shared"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import { z } from "zod"
+
+const baseUrl = "http://localhost:5173"
+const app = createApp({ publicBaseUrl: baseUrl })
 
 const shortenResponse = z.object({
   linkCode: z.string(),
@@ -60,6 +63,8 @@ describe("links API (real Postgres)", () => {
     const body = shortenResponse.parse(await res.json())
     expect(body.linkCode).toMatch(/^[A-Za-z0-9_-]{7}$/u)
     expect(body.originalUrl).toBe("https://example.com/")
+    // The short URL is built from the configured public base, not the request URL.
+    expect(body.url).toBe(`${baseUrl}/${body.linkCode}`)
 
     const redirect = await app.request(`/${body.linkCode}`)
     expect(redirect.status).toBe(HTTP_STATUS.FOUND)
