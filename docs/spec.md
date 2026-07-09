@@ -75,6 +75,7 @@ holds across the stack; only hand-written psql needs quoted identifiers.
 - Non-enumerable codes; parameterized queries (kysely); httpOnly session cookies.
 - Rate limiting on mint, auth, and redirect endpoints.
 - Target URLs are never fetched server-side — no SSRF surface.
+- Minted short URLs are built from a configured `PUBLIC_BASE_URL`, never the request `Host` — no Host-header injection / link poisoning (ADR-0009).
 - Destinations are immutable after creation (ADR-0004).
 - Security headers (CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors`, `Permissions-Policy`) at Caddy, with Hono `secureHeaders` as defense-in-depth.
 - HTTPS terminated by Caddy; secrets via env, never committed.
