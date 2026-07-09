@@ -15,13 +15,20 @@ contract and exposes end-to-end types via Hono RPC. Postgres is the source of tr
 Prerequisites: Docker. (pnpm + Node 24 only if you want to run the gate on the host.)
 
 ```sh
-docker compose up          # Postgres + Redis + API + web — migrations applied, env injected
+docker compose watch       # Postgres + Redis + API + web, with live-reload on edits
 ```
 
 That's the whole stack: the API on http://localhost:3000 and the SPA on
 http://localhost:5173 (its `/api` calls are proxied to the API). Compose injects each
 service's environment and applies pending migrations on start, so there's no `.env` to
-copy for the containers; edit a file under `src/` and the dev servers hot-reload.
+copy for the containers.
+
+`watch` is the dev loop: edit a file under `src/` and it's synced into the running
+container, so vite's HMR and the API's `tsx watch` reload — and because the sync writes
+into the container (not via a bind mount), it works on macOS/Windows too, where bind-mount
+file events don't propagate. Changing a `package.json`/lockfile rebuilds that image; a
+`vite.config.ts` change restarts web. Use plain `docker compose up` to just run the stack
+as built (no watching) — it's what the CI smoke job uses.
 
 Configuration is **fail-loud**: every variable the API needs is validated on boot (see
 [`apps/api/src/config.ts`](apps/api/src/config.ts)) — nothing is silently defaulted, so a
