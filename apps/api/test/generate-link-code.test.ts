@@ -1,4 +1,4 @@
-import { generateLinkCode } from "@jailu/api/src/lib/generate-link-code"
+import { generateLinkCode } from "@jailu/api/src/links/generate-link-code"
 import { LINK_CODE_LENGTH, linkCodeSchema } from "@jailu/shared"
 import { describe, expect, it } from "vitest"
 

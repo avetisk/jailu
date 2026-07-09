@@ -1,4 +1,4 @@
-import { redis } from "@jailu/api/src/cache"
+import { redis } from "@jailu/api/src/redis"
 
 // The redirect cache: `code -> originalUrl`, key-namespaced. Destinations are immutable
 // (ADR-0004) and there is no disable/expiry yet (Slice 6), so a cached URL can never go stale —

@@ -13,7 +13,7 @@ export default defineConfig({
       exclude: [
         "src/index.ts",
         "src/db/index.ts",
-        "src/cache/index.ts",
+        "src/redis/index.ts",
         "src/db/schema.ts",
         "src/db/migrator.ts",
         "src/db/migrate.ts",
