@@ -1,6 +1,14 @@
-# Local dev stack: `docker compose up` runs the whole thing — Postgres, Redis, the API,
-# and the web dev server — with env injected here (no in-process .env loader) and pending
-# migrations applied on start. No Caddy in dev; the production edge is the deploy slice.
+# Local dev stack. Two ways to run it:
+#
+#   docker compose watch   the dev loop — starts everything AND live-reloads on edits (below)
+#   docker compose up      just run the stack as built (no file-watching); what CI smoke uses
+#
+# `watch` is the one to use while developing: it syncs source edits into the running containers
+# (so vite's HMR and the api's `tsx watch` reload), rebuilds an image when its deps change, and
+# restarts web on a vite-config change. Sync copies files into the container's own filesystem
+# rather than relying on a bind mount, so it works on macOS/Windows too (bind-mount inotify does
+# not propagate there). Env is injected here (no in-process .env loader); pending migrations are
+# applied on api start. No Caddy in dev; the production edge is the deploy slice.
 services:
   postgres:
     image: postgres:17-alpine
@@ -43,15 +51,27 @@ services:
       # point there — not at this container's internal `api:3000` host.
       PUBLIC_BASE_URL: "http://localhost:5173"
     # Apply pending migrations (Postgres is healthy by depends_on), then watch-run the API.
+    # `tsx watch` restarts on the source `watch` syncs in below; migrate runs once per (re)start.
     command: sh -c "pnpm --filter @jailu/api migrate && pnpm --filter @jailu/api dev"
     ports:
       - "3000:3000"
-    volumes:
-      - ./apps/api/src:/app/apps/api/src
-      - ./packages/shared/src:/app/packages/shared/src
     depends_on:
       postgres:
         condition: service_healthy
+    # Live-reload for `docker compose watch`: sync api + shared source (tsx watch restarts),
+    # rebuild the image when this service's deps or the lockfile change.
+    develop:
+      watch:
+        - path: ./apps/api/src
+          action: sync
+          target: /app/apps/api/src
+        - path: ./packages/shared/src
+          action: sync
+          target: /app/packages/shared/src
+        - path: ./apps/api/package.json
+          action: rebuild
+        - path: ./pnpm-lock.yaml
+          action: rebuild
     # 127.0.0.1, not localhost: the Node server binds IPv4 (0.0.0.0), and `localhost`
     # resolves to IPv6 (::1) first in the container, which would refuse the connection.
     healthcheck:
@@ -73,12 +93,37 @@ services:
       API_PORT: "3000"
     ports:
       - "5173:5173"
-    volumes:
-      - ./apps/web/src:/app/apps/web/src
-      - ./packages/shared/src:/app/packages/shared/src
     depends_on:
       api:
         condition: service_healthy
+    # Live-reload for `docker compose watch`. src + shared sync into vite's HMR; the router's
+    # generated tree and temp dir are container-owned (gitignored), so they're excluded from the
+    # sync. vite reads vite.config.ts / tsr.config.json only at startup, so those restart the
+    # service. Dep/lockfile changes rebuild the image.
+    develop:
+      watch:
+        - path: ./apps/web/src
+          action: sync
+          target: /app/apps/web/src
+          ignore:
+            - routeTree.gen.ts
+            - .tanstack/
+        - path: ./packages/shared/src
+          action: sync
+          target: /app/packages/shared/src
+        - path: ./apps/web/index.html
+          action: sync
+          target: /app/apps/web/index.html
+        - path: ./apps/web/vite.config.ts
+          action: sync+restart
+          target: /app/apps/web/vite.config.ts
+        - path: ./apps/web/tsr.config.json
+          action: sync+restart
+          target: /app/apps/web/tsr.config.json
+        - path: ./apps/web/package.json
+          action: rebuild
+        - path: ./pnpm-lock.yaml
+          action: rebuild
     # 127.0.0.1 (IPv4), like the api service: vite binds 0.0.0.0 and localhost resolves to
     # IPv6 first in the container. Also lets `docker compose up --wait` gate on the web server.
     healthcheck:
