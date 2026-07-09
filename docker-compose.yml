@@ -76,6 +76,14 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    # 127.0.0.1 (IPv4), like the api service: vite binds 0.0.0.0 and localhost resolves to
+    # IPv6 first in the container. Also lets `docker compose up --wait` gate on the web server.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5173/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
   pgdata:

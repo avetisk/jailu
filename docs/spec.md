@@ -24,7 +24,7 @@ serves static. Postgres is the source of truth for data; Redis caches hot lookup
 (sliding TTL, bounded) and backs rate limiting.
 
 ```
-apps/web         React SPA — vite, @tanstack/react-router, @tanstack/react-query, tailwind, shadcn/ui, react-hook-form, zod
+apps/web         React SPA — vite, @tanstack/react-router, @tanstack/react-query, @tanstack/react-form, tailwind, shadcn/ui, react-i18next, zod
 apps/api         Hono (Node) — kysely + pg, better-auth, redis, zod; owns the contract (RPC)
 packages/shared  flat value schemas (urlSchema, …) shared by forms + API request schemas
 ```
@@ -84,7 +84,7 @@ holds across the stack; only hand-written psql needs quoted identifiers.
 
 0. Foundations — monorepo, tooling, CI, docker-compose (pg+redis), test harness, docs.
 1. Core — shorten + redirect, hardened validation, random codes.
-2. UI polish — tailwind + shadcn, react-hook-form, all states.
+2. UI polish — tailwind + shadcn, @tanstack/react-form + react-i18next, all states.
 3. Scale + security — redis cache, rate limiting, threat model.
 4. Deploy — `jai.lu` (Caddy edge, dockerized) + CI/CD, live from here.
 5. Passkey auth — better-auth.

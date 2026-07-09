@@ -1,5 +1,7 @@
 import { env } from "node:process"
 
+import tailwindcss from "@tailwindcss/vite"
+import { tanstackRouter } from "@tanstack/router-plugin/vite"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import tsconfigPaths from "vite-tsconfig-paths"
@@ -21,7 +23,15 @@ const serve = {
 }
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  // The tanstackRouter plugin must precede react() (it transforms route files before the JSX pass).
+  // Its tmpDir sits inside the (bind-mounted) src so the generator's temp -> routeTree.gen.ts rename
+  // stays on one filesystem: a cross-device rename across the docker bind mount fails with EXDEV.
+  plugins: [
+    tanstackRouter({ target: "react", autoCodeSplitting: false, tmpDir: "src/.tanstack" }),
+    react(),
+    tailwindcss(),
+    tsconfigPaths(),
+  ],
   server: serve,
   preview: serve,
 })
