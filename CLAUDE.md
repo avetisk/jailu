@@ -2,15 +2,17 @@
 
 ## Deploy / platform
 
-This project deploys to the shared prod host via **railgun**. Before adding a
-Dockerfile, ports, backing services, or storage, follow railgun's platform
-conventions (loopback port, container shape, Postgres/S3/Caddy, health
-endpoint): `/home/ubuntu/code/avetisk/railgun/docs/platform-conventions.md`
-(GitHub: `github.com/avetisk/railgun/blob/main/docs/platform-conventions.md`).
-The default tech stack (Solid front; Node+pnpm+Hono for plain apps, Rust/axum
-for perf/security-critical) is `docs/default-stack.md` in the same repo.
-Those docs are canonical and railgun-owned — read them before building
-anything deployable, and link rather than copy their content here.
+This project targets a **single-origin deployment behind a Caddy edge**: one
+public origin serves the static SPA, proxies `/api/*` to the API, and routes
+`/:code` redirects. Before adding a Dockerfile, ports, backing services, or
+storage, keep to that shape — a single loopback port, Postgres + Redis, a Caddy
+edge, and a health endpoint, packaged with Docker. The canonical deploy contract
+lives in the tracked docs; read them before building anything deployable, and
+link rather than copy their content here:
+
+- single-origin + Caddy edge rationale: `docs/adr/0002-single-origin-deployment.md`
+- deploy topology + platform surface: `docs/spec.md` (`## Deploy`)
+- dockerized dev stack: `docs/adr/0006-dockerized-dev-stack.md`
 
 ## Imports / path aliases
 
