@@ -4,6 +4,11 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# Untracked local project notes — private session state / machine-specific deploy
+# pointers kept out of the public case-study repo.
+CLAUDE.local.md
+HANDOFF.md
 playwright-report/
 test-results/
 *.log
