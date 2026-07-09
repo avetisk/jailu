@@ -2,5 +2,6 @@
   "routesDirectory": "./src/routes",
   "generatedRouteTree": "./src/routeTree.gen.ts",
   "quoteStyle": "double",
-  "semicolons": false
+  "semicolons": false,
+  "tmpDir": "src/.tanstack"
 }
