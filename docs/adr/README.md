@@ -10,3 +10,4 @@ Concise records of the decisions behind jailu. One file per decision.
 - ADR-0006 — Dockerized dev stack, env injected by compose
 - ADR-0007 — Localizable validation error codes
 - ADR-0008 — Forms via @tanstack/react-form
+- ADR-0009 — Short links from a configured public base URL
