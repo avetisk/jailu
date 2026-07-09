@@ -10,15 +10,24 @@ import { loadConfig } from "./src/config"
 
 const config = loadConfig(env)
 
+const apiTarget = `http://${config.api.host}:${config.api.port}`
+
 // The dev server and the built-app preview serve identically — same host/port and the same
-// /api proxy — so e2e hits one baseURL whether it runs against the production build (CI) or
-// the dev server (local). The only difference: dev transforms on the fly; preview serves dist/.
+// proxy — so e2e hits one baseURL whether it runs against the production build (CI) or the dev
+// server (local). The only difference: dev transforms on the fly; preview serves dist/.
 const serve = {
   host: config.web.host,
   port: config.web.port,
   strictPort: true,
   proxy: {
-    "/api": `http://${config.api.host}:${config.api.port}`,
+    "/api": apiTarget,
+    // `/:code` is a redirect the API owns (a 302), not a SPA route — in prod Caddy routes it to
+    // Hono (ADR-0002). Vite proxies only /api, so a minted link would otherwise load the SPA in
+    // dev; forward bare, single-segment, code-shaped paths (linkCodeSchema) to the API so short
+    // links redirect here too. A `^`-prefixed key is a RegExp; `$` keeps it to one segment, so
+    // vite's own assets (`/src/…`, `/@vite/…`, `/assets/…`, dotted files) never match. Future
+    // top-level SPA routes will need a reserved prefix — the same constraint prod's Caddy has.
+    "^/[A-Za-z0-9_-]{3,64}$": { target: apiTarget, changeOrigin: true },
   },
 }
 
