@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
 import { insertLink } from "@jailu/api/src/links/repository"
-import { resolveTarget } from "@jailu/api/src/links/resolve-target"
+import { resolveUrl } from "@jailu/api/src/links/resolve"
 import { HTTP_STATUS, linkCodeSchema, shortenableUrlSchema } from "@jailu/shared"
 import { Hono } from "hono"
 import { z } from "zod"
@@ -11,7 +11,7 @@ type AppOptions = { publicBaseUrl: string }
 
 // The API is the single source of truth for the contract. Routes are chained so `AppType`
 // carries end-to-end types to the client via Hono RPC. The redirect lives at the root
-// (`/:linkCode`) and resolves through a redis cache-aside (`links/resolve-target`); in production
+// (`/:linkCode`) and resolves through a redis cache-aside (`links/resolve`); in production
 // Caddy proxies it and `/api/*` to this server. The short URL is
 // built from `options.publicBaseUrl` (injected from config), never from `c.req.url`: the minted
 // link is a value we own, so a proxy's Host header can't poison it (PR #8 review).
@@ -32,11 +32,11 @@ export function createApp(options: AppOptions) {
       if (!parsed.success) {
         return c.notFound()
       }
-      const target = await resolveTarget(parsed.data)
-      if (!target) {
+      const originalUrl = await resolveUrl(parsed.data)
+      if (!originalUrl) {
         return c.notFound()
       }
-      return c.redirect(target, HTTP_STATUS.FOUND)
+      return c.redirect(originalUrl, HTTP_STATUS.FOUND)
     })
 }
 
