@@ -6,7 +6,18 @@ export const fr = {
     tagline: "plus court, c'est mieux",
     language: "Langue",
   },
+  form: {
+    url_label: "URL à raccourcir",
+    url_placeholder: "https://exemple.com/un/lien/tres/long",
+    submit: "Raccourcir",
+    submitting: "Raccourcissement…",
+    success_title: "Votre lien court",
+    copy: "Copier",
+    copied: "Copié",
+    reset: "Raccourcir une autre URL",
+  },
   errors: {
+    request_failed: "Une erreur s'est produite. Veuillez réessayer.",
     url: {
       empty: "Saisissez une URL à raccourcir.",
       too_long: "Cette URL est trop longue.",

@@ -7,7 +7,18 @@ export const en = {
     tagline: "shorter is better",
     language: "Language",
   },
+  form: {
+    url_label: "URL to shorten",
+    url_placeholder: "https://example.com/a/very/long/link",
+    submit: "Shorten",
+    submitting: "Shortening…",
+    success_title: "Your short link",
+    copy: "Copy",
+    copied: "Copied",
+    reset: "Shorten another",
+  },
   errors: {
+    request_failed: "Something went wrong. Please try again.",
     url: {
       empty: "Enter a URL to shorten.",
       too_long: "That URL is too long.",

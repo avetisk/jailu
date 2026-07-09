@@ -1,6 +1,8 @@
-import { app } from "@jailu/api/src/app"
+import { createApp } from "@jailu/api/src/app"
 import { HTTP_STATUS } from "@jailu/shared"
 import { describe, expect, it } from "vitest"
+
+const app = createApp({ publicBaseUrl: "http://localhost:5173" })
 
 describe("GET /api/health", () => {
   it("returns a 200 with status ok", async () => {
