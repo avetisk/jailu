@@ -2,8 +2,8 @@
 // test i18n-completeness garantit que ce catalogue couvre exactement l'ensemble des codes URL_ERROR.
 export const fr = {
   app: {
-    title: "jailu",
-    tagline: "Un raccourcisseur d'URL, construit tranche par tranche.",
+    title: "jai.lu",
+    tagline: "plus court, c'est mieux",
     language: "Langue",
   },
   errors: {

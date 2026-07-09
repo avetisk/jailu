@@ -3,8 +3,8 @@
 // enforces that this catalog and fr.ts cover exactly the URL_ERROR code set — no gaps, no orphans.
 export const en = {
   app: {
-    title: "jailu",
-    tagline: "A URL shortener, coming together slice by slice.",
+    title: "jai.lu",
+    tagline: "shorter is better",
     language: "Language",
   },
   errors: {
