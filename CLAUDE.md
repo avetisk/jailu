@@ -31,3 +31,11 @@ validated across `tsc`, `tsx`, `vitest`, and `vite`.
 - cross-package public API: the bare package name — `import { shortenableUrlSchema } from "@jailu/shared"`
 - exception: `vite.config.ts` / `playwright.config.ts` bootstrap the alias resolver, so they
   use relative `./src/config` (the alias isn't active yet while the config file itself loads).
+
+## Code layout
+
+One splitting predicate: **domain logic groups by feature; only shared infrastructure
+primitives group by technology.** In `apps/api/src/`, `links/` owns the whole links feature
+(repository, resolver, cache accessor, code minting); `db/` and `redis/` hold only the infra
+clients; `lib/` only domain-agnostic utilities. Don't mix the two axes — a role like "cache" must
+live in exactly one place (the feature's `links/cache.ts`), never also as a `cache/` infra folder.
