@@ -1,0 +1,22 @@
+{
+  "name": "@jailu/jailu",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "dev:compose": "env $(cat ../../.env) docker compose up",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "oxlint",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
+  },
+  "dependencies": {
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:"
+  }
+}

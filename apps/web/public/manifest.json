@@ -1,0 +1,8 @@
+{
+  "short_name": "jai.lu",
+  "name": "jai.lu - short is better",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

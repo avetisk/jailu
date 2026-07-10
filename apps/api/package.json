@@ -1,0 +1,28 @@
+{
+  "name": "@jailu/api",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "env $(cat ../../.env) tsx watch src/lib/serve/dev.ts",
+    "kysely": "env $(cat ../../.env) pnpx kysely-ctl",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --deny-warnings",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.8",
+    "@hono/zod-validator": "^0.8.0",
+    "@jailu/common": "workspace:^",
+    "hono": "^4.12.28",
+    "kysely": "^0.29.3",
+    "kysely-ctl": "^0.21.0",
+    "pg": "^8.22.0",
+    "tslog": "^4.11.0",
+    "tsx": "^4.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "^8.20.0"
+  }
+}

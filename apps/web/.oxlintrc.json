@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["../../.oxlintrc.json"],
+  // We ignore everything coming from shadcn/ui
+  "ignorePatterns": ["src/components/ui/**"],
+  "plugins": ["typescript", "react"],
+  "env": {
+    "builtin": true,
+    "browser": true
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/no-unescaped-entities": "error",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn"
+  }
+}
