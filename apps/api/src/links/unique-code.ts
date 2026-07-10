@@ -1,5 +1,5 @@
 import { PG_ERROR_CODES } from "@jailu/api/src/db/error-codes"
-import { generateLinkCode } from "@jailu/api/src/lib/generate-link-code"
+import { generateLinkCode } from "@jailu/api/src/links/generate-link-code"
 
 const MAX_ATTEMPTS = 5
 

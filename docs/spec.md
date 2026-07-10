@@ -60,14 +60,14 @@ holds across the stack; only hand-written psql needs quoted identifiers.
 
 - `302` redirect, not `301` — keep control over the destination and analytics.
 - Random 7-char base64url codes (URL-safe 64-char alphabet) — 64^7 = 4,398,046,511,104 possibilities; non-enumerable; unique constraint + retry on collision.
-- Redis cache on the redirect hot path — sliding TTL (resets on access), bounded with LRU eviction (newest evicts oldest); invalidated on disable/expire.
+- Redis cache on the redirect hot path — cache-aside, sliding TTL (resets on access via `GETEX`), bounded with `maxmemory` + `allkeys-lru`; invalidated on disable/expire (Slice 6). ADR-0010.
 - Redis rate limiting on mint + auth + redirect.
 - API contract via Hono RPC — the server owns request/response types; only flat value schemas are shared (`packages/shared`); forms own their schemas (ADR-0003).
 - `kysely` (typed SQL) over an ORM — explicit queries, full types, no magic.
 - Passkeys (WebAuthn) via better-auth — phishing-resistant, session-only.
 - Link expiry is authoritative in Postgres (`expiresAt`); Redis TTL only mirrors it. Expired links return `410`.
 - Link destinations are immutable — `PATCH` never repoints an existing code (anti-phishing, ADR-0004).
-- Redirect lookup is benchmarked (redis-then-pg vs pg-only) before assuming the cache wins — a unique-indexed `code` hit may beat the round-trip at low cardinality.
+- Redirect lookup is benchmarked (redis-then-pg vs pg-only) before assuming the cache wins: measured, the cache roughly halves p50 and doubles throughput even with pg co-located (ADR-0010).
 
 ## Security posture
 

@@ -6,6 +6,7 @@ const validEnv = {
   API_PORT: "3000",
   DATABASE_URL: "postgres://jailu:jailu@127.0.0.1:5432/jailu",
   PUBLIC_BASE_URL: "http://localhost:5173",
+  REDIS_URL: "redis://127.0.0.1:6379",
 }
 
 describe("loadConfig", () => {
@@ -13,6 +14,7 @@ describe("loadConfig", () => {
     expect(loadConfig(validEnv)).toEqual({
       api: { host: "127.0.0.1", port: 3000 },
       database: { url: "postgres://jailu:jailu@127.0.0.1:5432/jailu" },
+      redis: { url: "redis://127.0.0.1:6379" },
       publicBaseUrl: "http://localhost:5173",
     })
   })
@@ -26,6 +28,7 @@ describe("loadConfig", () => {
         API_HOST: validEnv.API_HOST,
         API_PORT: validEnv.API_PORT,
         DATABASE_URL: validEnv.DATABASE_URL,
+        PUBLIC_BASE_URL: validEnv.PUBLIC_BASE_URL,
       }),
     ).toThrow()
   })
@@ -38,5 +41,10 @@ describe("loadConfig", () => {
   it("rejects a public base URL that is not an http(s) URL", () => {
     expect(() => loadConfig({ ...validEnv, PUBLIC_BASE_URL: "api:3000" })).toThrow()
     expect(() => loadConfig({ ...validEnv, PUBLIC_BASE_URL: "ftp://jai.lu" })).toThrow()
+  })
+
+  it("rejects a redis URL that is not a redis(s) URL", () => {
+    expect(() => loadConfig({ ...validEnv, REDIS_URL: "127.0.0.1:6379" })).toThrow()
+    expect(() => loadConfig({ ...validEnv, REDIS_URL: "http://127.0.0.1:6379" })).toThrow()
   })
 })

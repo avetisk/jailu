@@ -10,10 +10,15 @@ const configSchema = z
     // (never derived from the request URL), so a reverse proxy's Host header can't steer the
     // minted link — inject it, don't trust external input (PR #8 review). http(s) only.
     PUBLIC_BASE_URL: z.url({ protocol: /^https?$/u }),
+    // The redis connection string for the redirect cache (and Slice 3b rate limiting). The cache
+    // is a disposable accelerator, but its URL is fail-loud config like the rest — no in-code
+    // default. redis/rediss only.
+    REDIS_URL: z.url({ protocol: /^rediss?$/u }),
   })
   .transform((env) => ({
     api: { host: env.API_HOST, port: env.API_PORT },
     database: { url: env.DATABASE_URL },
+    redis: { url: env.REDIS_URL },
     publicBaseUrl: env.PUBLIC_BASE_URL,
   }))
 
