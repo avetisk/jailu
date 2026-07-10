@@ -4,6 +4,50 @@ A URL shortener: turn a long link into a short `https://jai.lu/<code>` that redi
 the original. Built to be simple, hardened, and production-ready — see [`docs/spec.md`](docs/spec.md)
 for the full specification and [`docs/adr/`](docs/adr) for the decisions behind it.
 
+## Workflow
+
+Spec-driven, one thin vertical slice per PR, every slice behind an all-green gate.
+The agent implements inside human-authored rails — the spec, the ADRs, and
+`CLAUDE.md`; I set the intent, review each diff, and hold the gate. Nothing merges
+that isn't green.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RAILS · human-authored, durable, in version control
+   docs/spec.md   scope · architecture · data model · API · roadmap · gates
+   docs/adr/NN    one decision per file, cross-referenced
+   CLAUDE.md      conventions + guardrails — "read the docs first"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                              │ steers every slice
+                              ▼
+        roadmap ─►  thin vertical SLICES, one PR each
+                    ( 1 · 2a · 2b · 2c · 2d · 3a · … )
+                              │
+                              ▼
+   ┌───────────────────────  PER SLICE  ───────────────────────────┐
+   │                                                               │
+   │   branch  slice/<phase><letter>                               │
+   │       │                                                       │
+   │       ▼                                                       │
+   │   AGENT implements ──────────────┐                            │
+   │       │                          │  review loop:              │
+   │       ▼                          │  "address review           │
+   │   HUMAN review ── changes ───────┘   → refactor"              │
+   │       │ approved                                              │
+   │       ▼                                                       │
+   │   QUALITY GATE — all-green before merge                       │
+   │       lint(deny-warn) · fmt · typecheck ·                     │
+   │       coverage(real-pg) · e2e · security review · docs        │
+   │       │                                                       │
+   │       ▼                                                       │
+   │   PR ─► CI (same gate) ─► merge → main ──► next slice ↺       │
+   │       │                                                       │
+   └───────┼───────────────────────────────────────────────────────┘
+           │ deploy on merge
+           ▼
+      jai.lu  (live)
+```
+
 ## Stack
 
 pnpm monorepo. A React SPA (`apps/web`) calls a Hono API (`apps/api`) that owns the
