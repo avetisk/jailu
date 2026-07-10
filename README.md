@@ -13,7 +13,8 @@ This branch is showcasing a simple implementation yet fully functional and full 
 You will need 2 different running shells: one for docker compose and the other for the front and the back.
 
 1. `pnpm dev:compose` -> starts the docker compose injecting the env vars.
-2. `pnpm dev` -> starts both frontend (`apps/web`) and backend (`apps/api`).
+2. Run DB migrations `pnpm --filter api kysely migrate:latest`
+3. `pnpm dev` -> starts both frontend (`apps/web`) and backend (`apps/api`).
 
 ## Stack
 
