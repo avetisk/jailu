@@ -125,6 +125,78 @@ docker compose down       # stop and remove the containers
 docker compose down -v    # …and drop the Postgres volume for a clean slate
 ```
 
+## Technical choices
+
+The decisions and their rationale live in [`docs/spec.md`](docs/spec.md) and one ADR per
+decision under [`docs/adr/`](docs/adr). The headlines, each linking to the detail:
+
+- **Monorepo, shared as source** — a pnpm workspace; the SPA and API consume
+  `packages/shared` (and the API's RPC types) as TypeScript source, with no build step
+  between packages. [ADR-0001](docs/adr/0001-monorepo-layout.md)
+- **The API owns the contract via Hono RPC** — the server defines request/response types
+  and the client gets them end-to-end typed (`hc<AppType>`); only flat value schemas are
+  shared, and forms keep their own schemas mapping to the API payload.
+  [ADR-0003](docs/adr/0003-api-contract-via-rpc.md), [ADR-0007](docs/adr/0007-validation-error-codes.md)
+- **Typed SQL over an ORM** — `kysely` + `pg`, explicit queries and full types; Postgres is
+  the source of truth. ([Architecture](docs/spec.md#architecture))
+- **Hardened URL validation** — the shared `urlSchema` allowlists `http`/`https`, rejects
+  embedded credentials / self-host / `localhost` / bare IPs / no-public-TLD, caps length,
+  and normalizes; the target is never fetched server-side (no SSRF).
+  [ADR-0005](docs/adr/0005-url-validation-hardening.md)
+- **Non-enumerable codes, `302` redirect** — random 7-char base64url (64^7 ≈ 4.4×10¹²),
+  unique constraint + retry on collision; `302` (not `301`) keeps control of the
+  destination and enables analytics. ([Key decisions](docs/spec.md#key-decisions-see-docsadr))
+- **Immutable destinations** — a code never repoints after creation (anti-phishing).
+  [ADR-0004](docs/adr/0004-immutable-destination.md)
+- **Short links from a configured base URL** — built from `PUBLIC_BASE_URL`, never the
+  request `Host`, so links can't be poisoned by a spoofed Host header.
+  [ADR-0009](docs/adr/0009-public-base-url.md)
+- **Redis cache on the redirect hot path** — cache-aside, sliding TTL, bounded + LRU, and
+  benchmarked against pg-only before adopting. [ADR-0010](docs/adr/0010-redirect-cache.md)
+- **Single origin behind a Caddy edge** — in prod Caddy terminates TLS, serves the SPA,
+  sets security headers, and proxies `/api/*` + `/:code`; Hono never serves static.
+  [ADR-0002](docs/adr/0002-single-origin-deployment.md)
+- **Dockerized dev stack** — one `docker compose` brings up pg + redis + api + web with env
+  injected by Compose; config is fail-loud with no in-process `.env` loader.
+  [ADR-0006](docs/adr/0006-dockerized-dev-stack.md)
+- **UI** — React + Vite, `@tanstack/react-router` / `-query` / `-form`, tailwind +
+  shadcn/ui, react-i18next; the form validates the shared zod schema via TanStack Form.
+  [ADR-0008](docs/adr/0008-forms-tanstack.md)
+
+Full security posture: [`docs/spec.md` → Security posture](docs/spec.md#security-posture).
+
+## Assumptions & shortcuts
+
+This repo implements the [spec](docs/spec.md) as thin vertical slices (see [Workflow](#workflow)
+above and the [roadmap](docs/spec.md#roadmap-pr-per-slice)) and is **currently through Slice 3a**.
+So the honest state is:
+
+- **Built and live on `main`:** shorten (`POST /api/links`), redirect (`GET /:code`), the
+  health probe, hardened validation, non-enumerable codes, the polished UI (i18n + form),
+  and the Redis redirect cache. The `links` table holds `id`, `linkCode`, `originalUrl`,
+  `createdAt`.
+- **Specced but not yet built:** rate limiting + threat model (Slice 3b/3c), the live Caddy
+  deploy (4), passkey auth (5), link management — alias / disable / delete / expiry (6), and
+  click analytics (7). The remaining [API surface](docs/spec.md#api-surface) and data-model
+  columns (`ownerId`, `disabled`, `expiresAt`, `clickEvents`, auth tables) are designed in
+  the spec but not migrated yet.
+- **Deliberately out of scope** (documented, not built): teams/roles, bulk import, QR codes,
+  malicious-URL scanning, email flows, cross-shortener redirect-loop detection. See
+  [Scope](docs/spec.md#scope).
+
+Simplifications worth calling out:
+
+- **No cache invalidation yet** — safe by construction: destinations are immutable
+  ([ADR-0004](docs/adr/0004-immutable-destination.md)) and there is no disable/expiry until
+  Slice 6, so a cached entry can't go stale; the invalidation seam lands with that slice.
+  ([ADR-0010](docs/adr/0010-redirect-cache.md))
+- **No Caddy in dev** — the Vite dev server stands in for the production edge (it proxies
+  `/api/*` and code-shaped paths to the API); TLS, security headers, and static serving are
+  the prod-only Caddy layer. ([ADR-0002](docs/adr/0002-single-origin-deployment.md))
+- **Fail-loud config** — every variable is validated on boot with no silent defaults and no
+  in-process `.env` loader; env comes from Compose (containers) or the environment (host,
+  for tests/CI). ([ADR-0006](docs/adr/0006-dockerized-dev-stack.md))
+
 ## Quality gates
 
 Every slice ships behind an all-green gate: `pnpm lint` (oxlint, deny-warnings),
