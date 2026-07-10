@@ -54,37 +54,75 @@ pnpm monorepo. A React SPA (`apps/web`) calls a Hono API (`apps/api`) that owns 
 contract and exposes end-to-end types via Hono RPC. Postgres is the source of truth
 (kysely, typed SQL). Flat value schemas shared by both sides live in `packages/shared`.
 
-## Getting started (local dev)
+## Getting started
 
-Prerequisites: Docker. (pnpm + Node 24 only if you want to run the gate on the host.)
+The whole stack — Postgres, Redis, the API, and the web app — runs from a single command
+with Docker. Nothing else is installed on your machine: no local Node, pnpm, database, or
+`.env` to copy. Every dependency resolves from the public npm registry.
+
+### Prerequisites
+
+- **Docker Engine** with the **Compose v2** plugin (the `docker compose` subcommand). The
+  live-reload dev loop (`docker compose watch`, below) needs Compose ≥ 2.22.
+
+That's all you need to run the app. Node 24 (see `.nvmrc`) and pnpm are only required to run
+the quality gate on the host — see [Quality gates](#quality-gates).
+
+### Run it
 
 ```sh
-docker compose watch       # Postgres + Redis + API + web, with live-reload on edits
+git clone https://github.com/avetisk/jailu.git
+cd jailu
+docker compose up --wait -d
 ```
 
-That's the whole stack: the API on http://localhost:3000 and the SPA on
-http://localhost:5173 (its `/api` calls are proxied to the API). Compose injects each
-service's environment and applies pending migrations on start, so there's no `.env` to
-copy for the containers.
+`docker compose up` builds the two app images (installing the pnpm workspace against a
+frozen lockfile), then starts Postgres 17, Redis 7, the API, and the web app. `--wait`
+blocks until every container passes its healthcheck; `-d` runs them in the background. The
+API applies pending database migrations on start, so the schema is ready with no extra
+step. The first run builds the images and can take a few minutes; later runs reuse the
+build cache and come up in well under a minute.
 
-`watch` is the dev loop: edit a file under `src/` and it's synced into the running
-container, so vite's HMR and the API's `tsx watch` reload — and because the sync writes
-into the container (not via a bind mount), it works on macOS/Windows too, where bind-mount
-file events don't propagate. Changing a `package.json`/lockfile rebuilds that image; a
-`vite.config.ts` change restarts web. Use plain `docker compose up` to just run the stack
-as built (no watching) — it's what the CI smoke job uses.
+When the command returns, the stack is up:
+
+- **Web app** — http://localhost:5173
+- **API** — http://localhost:3000 (health check: http://localhost:3000/api/health)
+
+### Try it
+
+Open **http://localhost:5173**, paste a long URL, and submit — you get a short
+`http://localhost:5173/<code>` to copy; visiting it redirects to the original.
+
+Or from the shell:
+
+```sh
+# shorten a URL
+curl -X POST localhost:3000/api/links -H 'content-type: application/json' \
+  -d '{"url":"https://example.com/some/long/path"}'
+# -> {"linkCode":"XEzs1DX","url":"http://localhost:5173/XEzs1DX","originalUrl":"https://example.com/some/long/path"}
+
+# follow the short link (302 -> the original URL)
+curl -I localhost:5173/XEzs1DX
+```
+
+### Develop
+
+Use `docker compose watch` instead of `up` for the dev loop: edits under `src/` are synced
+into the running containers, so Vite's HMR and the API's `tsx watch` reload. Because the
+sync writes into the container rather than relying on a bind mount, it works on
+macOS/Windows too, where bind-mount file events don't propagate. Changing a
+`package.json`/lockfile rebuilds that image; a `vite.config.ts` change restarts web.
 
 Configuration is **fail-loud**: every variable the API needs is validated on boot (see
 [`apps/api/src/config.ts`](apps/api/src/config.ts)) — nothing is silently defaulted, so a
-missing value is an error, not a surprise. In a container that env comes from compose; on
-the host (tests, CI) it comes from the environment — there is no in-process `.env` loader.
+missing value is an error, not a surprise. In a container that env is injected by Compose;
+on the host (tests, CI) it comes from the environment — there is no in-process `.env` loader.
 
-Try it once the stack is up:
+### Stop / reset
 
 ```sh
-curl -X POST localhost:3000/api/links -H 'content-type: application/json' \
-  -d '{"url":"https://example.com/some/long/path"}'
-# -> { "linkCode": "...", "url": ".../<linkCode>", "originalUrl": "..." }
+docker compose down       # stop and remove the containers
+docker compose down -v    # …and drop the Postgres volume for a clean slate
 ```
 
 ## Quality gates
