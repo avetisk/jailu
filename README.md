@@ -167,35 +167,35 @@ Full security posture: [`docs/spec.md` → Security posture](docs/spec.md#securi
 
 ## Assumptions & shortcuts
 
-This repo implements the [spec](docs/spec.md) as thin vertical slices (see [Workflow](#workflow)
-above and the [roadmap](docs/spec.md#roadmap-pr-per-slice)) and is **currently through Slice 3a**.
-So the honest state is:
+The brief — a simple URL shortener: a React + TypeScript form, a shorten endpoint, working
+redirection, and a SQL database, easy to run — is delivered and runs from one command
+([above](#getting-started)). Live on `main`: shorten (`POST /api/links`), redirect
+(`GET /:code`), a health probe, hardened validation, non-enumerable codes, the polished UI
+(i18n + form), and a Redis cache on the redirect path.
 
-- **Built and live on `main`:** shorten (`POST /api/links`), redirect (`GET /:code`), the
-  health probe, hardened validation, non-enumerable codes, the polished UI (i18n + form),
-  and the Redis redirect cache. The `links` table holds `id`, `linkCode`, `originalUrl`,
-  `createdAt`.
-- **Specced but not yet built:** rate limiting + threat model (Slice 3b/3c), the live Caddy
-  deploy (4), passkey auth (5), link management — alias / disable / delete / expiry (6), and
-  click analytics (7). The remaining [API surface](docs/spec.md#api-surface) and data-model
-  columns (`ownerId`, `disabled`, `expiresAt`, `clickEvents`, auth tables) are designed in
-  the spec but not migrated yet.
-- **Deliberately out of scope** (documented, not built): teams/roles, bulk import, QR codes,
-  malicious-URL scanning, email flows, cross-shortener redirect-loop detection. See
-  [Scope](docs/spec.md#scope).
+**Assumptions baked in:**
 
-Simplifications worth calling out:
+- Destinations are **immutable** — a code never repoints after creation ([ADR-0004](docs/adr/0004-immutable-destination.md)).
+- Short links are built from a configured `PUBLIC_BASE_URL`, never the request `Host` ([ADR-0009](docs/adr/0009-public-base-url.md)).
+- Config is **fail-loud** — every variable is validated on boot, with no silent defaults and
+  no in-process `.env` loader; env comes from Compose (containers) or the environment (host,
+  for tests/CI). ([ADR-0006](docs/adr/0006-dockerized-dev-stack.md))
 
-- **No cache invalidation yet** — safe by construction: destinations are immutable
-  ([ADR-0004](docs/adr/0004-immutable-destination.md)) and there is no disable/expiry until
-  Slice 6, so a cached entry can't go stale; the invalidation seam lands with that slice.
-  ([ADR-0010](docs/adr/0010-redirect-cache.md))
+**Deliberate shortcuts:**
+
+- **No cache invalidation** — safe by construction: destinations are immutable and there is
+  no disable/expiry, so a cached entry can't go stale ([ADR-0010](docs/adr/0010-redirect-cache.md)).
 - **No Caddy in dev** — the Vite dev server stands in for the production edge (it proxies
   `/api/*` and code-shaped paths to the API); TLS, security headers, and static serving are
-  the prod-only Caddy layer. ([ADR-0002](docs/adr/0002-single-origin-deployment.md))
-- **Fail-loud config** — every variable is validated on boot with no silent defaults and no
-  in-process `.env` loader; env comes from Compose (containers) or the environment (host,
-  for tests/CI). ([ADR-0006](docs/adr/0006-dockerized-dev-stack.md))
+  the prod-only Caddy layer ([ADR-0002](docs/adr/0002-single-origin-deployment.md)).
+
+**Beyond the brief — future work, by design:** the [spec](docs/spec.md) sketches a fuller
+product, built as further [slices](docs/spec.md#roadmap-pr-per-slice) — passkey auth,
+per-user link management (alias / disable / delete / expiry), click analytics, rate
+limiting, and a live Caddy deploy. These are intentionally outside this test's scope, not
+unfinished work. Explicitly excluded even from that roadmap ([Scope](docs/spec.md#scope)):
+teams/roles, bulk import, QR codes, malicious-URL scanning, email flows, cross-shortener
+redirect-loop detection.
 
 ## Quality gates
 
