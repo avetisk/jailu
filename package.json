@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm -r dev",
-    "dev:compose": "env $(cat ../../.env) docker compose up",
+    "dev:compose": "env $(cat .env) docker compose up",
     "typecheck": "pnpm -r typecheck",
     "lint": "oxlint",
     "fmt": "oxfmt",
